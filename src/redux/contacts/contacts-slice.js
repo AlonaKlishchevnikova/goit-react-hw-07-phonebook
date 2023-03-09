@@ -1,37 +1,53 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { nanoid } from 'nanoid';
+// import { nanoid } from 'nanoid';
+import { fetchAllContacts, fetchAddContact, fetchDeleteContact } from './contacts-operations';
+
+const initialState = {
+    items: [],
+    loading: false,
+    error: null,
+}
+
 
 const contactsSlice = createSlice({
   name: 'contacts',
-  initialState: [],
-  reducers: {
-    addContact: {
-      reducer: (store, { payload }) => {
-        const isContactExist = store.find(
-          contact => contact.name.toLowerCase() === payload.name.toLowerCase()
-        );
-        if (isContactExist) {
-          alert(`User with name ${payload.name} is already in contacts`);
-          return;
-        }
-
-        return [...store, payload];
-      },
-
-      prepare: data => {
-        return {
-          payload: {
-            ...data,
-            id: nanoid(),
-          },
-        };
-      },
-    },
-    deleteContact: (store, { payload }) =>
-      store.filter(item => item.id !== payload),
-  },
-});
-
-export const { addContact, deleteContact } = contactsSlice.actions;
-console.log(contactsSlice);
+  initialState,
+   extraReducers: (builder) => {
+        builder
+            .addCase(fetchAllContacts.pending, (store) => {
+                store.loading = true;
+            })
+            .addCase(fetchAllContacts.fulfilled, (store, { payload }) => {
+                store.loading = false;
+                store.items = payload;
+            })
+            .addCase(fetchAllContacts.rejected, (store, { payload }) => {
+                store.loading = false;
+                store.error = payload;
+            })
+            .addCase(fetchAddContact.pending, (store) => {
+                store.loading = true;
+            })
+            .addCase(fetchAddContact.fulfilled, (store, { payload }) => {
+                store.loading = false;
+                store.items.push(payload);
+            })
+            .addCase(fetchAddContact.rejected, (store, { payload }) => {
+                store.loading = false;
+                store.error = payload;
+            })
+            .addCase(fetchDeleteContact.pending, (store) => {
+                store.loading = true;
+            })
+            .addCase(fetchDeleteContact.fulfilled, (store, { payload }) => {
+                store.loading = false;
+                const index = store.items.findIndex(item => item.id === payload);
+                store.items.splice(index, 1);
+            })
+            .addCase(fetchDeleteContact.rejected, (store, { payload }) => {
+                store.loading = false;
+                store.error = payload;
+            })
+    }
+})
 export default contactsSlice.reducer;

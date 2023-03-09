@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { addContact } from 'redux/contacts/contacts-slice';
+import { fetchAddContact } from '../../../redux/contacts/contacts-operations';
 
 import { getFilteredContacts } from 'redux/contacts/contacts-selectors';
 
@@ -16,16 +16,18 @@ const ContactForm = () => {
 
   const handleSubmit = event => {
     event.preventDefault();
-
-    const isContactExist = contacts.find(
-      contact => contact.name.toLowerCase() === name.toLowerCase()
+    const isContactExist = contacts.find(({ name, number }) =>
+    
+      contact => contact.name.toLowerCase() === name.toLowerCase()|| contact.number === number
     );
     if (isContactExist) {
       alert(`User with name ${name} is already in contacts`);
       return;
     }
 
-    dispatch(addContact({ name, number }));
+
+  
+    dispatch(fetchAddContact ({ name, number }));
     setName('');
     setNumber('');
   };
